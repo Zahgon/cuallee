@@ -6,7 +6,8 @@
 .py3812/
 .py312/
 .py310/
-
+.venv-container/
+uv.lock
 # Cache
 **__pycache__/
 .DS_Store
