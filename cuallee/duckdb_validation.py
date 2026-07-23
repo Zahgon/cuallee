@@ -22,186 +22,122 @@ class Compute:
         return f"SUM(CAST({rule.column} IS NOT NULL AS INTEGER))"
 
     def is_empty(self, rule: Rule) -> str:
-        """Verify the presence of null values in a column"""
-        return f"SUM(CAST({rule.column} IS NULL AS INTEGER))"
+        pass
 
     def are_complete(self, rule: Rule) -> str:
-        """Verify the abscence of null values on groups of columns"""
-        return (
-            "SUM( "
-            + " + ".join(
-                [f"(CAST({column} IS NOT NULL AS INTEGER))" for column in rule.column]
-            )
-            + f") / {float(len(rule.column))}"
-        )
+        pass
 
     def is_unique(self, rule: Rule) -> str:
         """Confirms the absence of duplicate values in a column"""
         return f"COUNT(DISTINCT({rule.column}))"
 
     def are_unique(self, rule: Rule) -> str:
-        return (
-            "( "
-            + " + ".join([f"approx_count_distinct({column})" for column in rule.column])
-            + f") / cast({float(len(rule.column))} AS FLOAT)"
-        )
+        pass
 
     def is_greater_than(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} > {rule.value} AS INTEGER))"
+        pass
 
     def is_less_than(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} < {rule.value} AS INTEGER))"
+        pass
 
     def is_greater_or_equal_than(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} >= {rule.value} AS INTEGER))"
+        pass
 
     def is_less_or_equal_than(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} <= {rule.value} AS INTEGER))"
+        pass
 
     def is_equal_than(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} = {rule.value} AS INTEGER))"
+        pass
 
     def has_pattern(self, rule: Rule) -> str:
-        return f"SUM(CAST(REGEXP_MATCHES({rule.column}, '{rule.value}') AS INTEGER))"
+        pass
 
     def has_min(self, rule: Rule) -> str:
-        return f"MIN({rule.column}) = {rule.value}"
+        pass
 
     def has_max(self, rule: Rule) -> str:
-        return f"MAX({rule.column}) = {rule.value}"
+        pass
 
     def has_std(self, rule: Rule) -> str:
-        return f"STDDEV_SAMP({rule.column}) = {rule.value}"
+        pass
 
     def has_mean(self, rule: Rule) -> str:
-        return f"AVG({rule.column}) = {rule.value}"
+        pass
 
     def has_sum(self, rule: Rule) -> str:
-        return f"SUM({rule.column}) = {rule.value}"
+        pass
 
     def has_cardinality(self, rule: Rule) -> str:
-        return f"COUNT(DISTINCT({rule.column})) = {rule.value}"
+        pass
 
     def has_infogain(self, rule: Rule) -> str:
-        return f"COUNT(DISTINCT({rule.column})) > 1"
+        pass
 
     def is_between(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} BETWEEN '{rule.value[0]}' AND '{rule.value[1]}' AS INTEGER))"
+        pass
 
     def is_contained_in(self, rule: Rule) -> str:
-        return f"SUM(CAST({rule.column} IN {rule.value} AS INTEGER))"
+        pass
 
     def not_contained_in(self, rule: Rule) -> str:
-        """Validation of column value not in a set of given values"""
-        return f"SUM(CAST({rule.column} NOT IN {rule.value} AS INTEGER))"
+        pass
 
     def has_percentile(self, rule: Rule) -> str:
-        return f"QUANTILE_CONT({rule.column}, {rule.settings['percentile']}) = {rule.value}"
+        pass
 
     def has_max_by(self, rule: Rule) -> str:
-        return f"MAX_BY({rule.column[0]}, {rule.column[1]}) = '{rule.value}'"
+        pass
 
     def has_min_by(self, rule: Rule) -> str:
-        return f"MIN_BY({rule.column[0]}, {rule.column[1]}) = '{rule.value}'"
+        pass
 
     def has_correlation(self, rule: Rule) -> str:
-        return f"CORR({rule.column[0]}, {rule.column[1]}) = {rule.value}"
+        pass
 
     def satisfies(self, rule: Rule) -> str:
-        """Allows arbitrary SQL statement execution as rules"""
-
-        # Compatibility with other dataframe regular expression comparissons
-        expression = re.compile(re.escape("rlike"), re.IGNORECASE)
-        subquery = expression.sub("SIMILAR TO", rule.value)
-        return f"SUM(CAST(({subquery}) AS INTEGER))"
+        pass
 
     def has_entropy(self, rule: Rule) -> str:
-        return f"ENTROPY({rule.column}) = {rule.value}"
+        pass
 
     def is_on_weekday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) BETWEEN 1 AND 5 AS INTEGER))"
+        pass
 
     def is_on_weekend(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) IN (0,6) AS INTEGER))"
+        pass
 
     def is_on_monday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 1 AS INTEGER))"
+        pass
 
     def is_on_tuesday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 2 AS INTEGER))"
+        pass
 
     def is_on_wednesday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 3 AS INTEGER))"
+        pass
 
     def is_on_thursday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 4 AS INTEGER))"
+        pass
 
     def is_on_friday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 5 AS INTEGER))"
+        pass
 
     def is_on_saturday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 6 AS INTEGER))"
+        pass
 
     def is_on_sunday(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(dow from {rule.column}) = 0 AS INTEGER))"
+        pass
 
     def is_on_schedule(self, rule: Rule) -> str:
-        return f"SUM(CAST(EXTRACT(hour from {rule.column}) BETWEEN {rule.value[0]} AND {rule.value[1]} AS INTEGER))"
+        pass
 
     def is_daily(self, rule: Rule) -> str:
-        """Returns the number or violations and matches on a daily schedule"""
-
-        if rule.value is None:
-            day_mask = tuple([1, 2, 3, 4, 5])
-        else:
-            day_mask = rule.value
-
-        template = Template(
-            """
-            distinct(select LIST_VALUE(count(B.$id),SUM(CAST(B.$id IS NULL AS INTEGER))::INTEGER) as r from (
-            select distinct(unnest(range(min($id)::TIMESTAMP, cast(date_add(max($id), INTERVAL 1 DAY) as TIMESTAMP), INTERVAL 1 DAY))) as w,
-            extract(dow from w) as y from '$table'
-            ) A LEFT JOIN '$table' B ON A.w = B.$id where A.y in $value)
-        """.strip()
-        )
-
-        return template.substitute(
-            {"id": rule.column, "value": str(day_mask), "table": self.table_name}
-        )
+        pass
 
     def is_inside_interquartile_range(self, rule: Rule) -> str:
-        template = Template(
-            """
-            (select SUM(CAST(A.$id BETWEEN B.q[1] AND B.q[2] AS INTEGER)) as r from $table A,(
-            select QUANTILE_CONT($id, [0.25, 0.75]) as q from $table) B)
-        """.strip()
-        )
-        return template.substitute({"id": rule.column, "table": self.table_name})
+        pass
 
     def has_workflow(self, rule: Rule) -> str:
-        template = Template(
-            """
-        (select sum(A.CUALLEE_RESULT) from (
-            select
-            lead($event) over (partition by $name order by $ordinal) as CUALLEE_EVENT,
-            LIST_VALUE($event, CUALLEE_EVENT) as CUALLEE_EDGE,
-            LIST_VALUE$basis as CUALLEE_GRAPH,
-            CAST(array_has(CUALLEE_GRAPH, CUALLEE_EDGE) AS INTEGER) as CUALLEE_RESULT
-            from '$table'
-        ) as A)
-        """.strip()
-        )
-        name, event, ordinal = rule.column
-        basis = str(tuple(map(list, rule.value))).replace("None", "NULL")
-        return template.substitute(
-            {
-                "name": name,
-                "event": event,
-                "ordinal": ordinal,
-                "basis": basis,
-                "table": self.table_name,
-            }
-        )
+        pass
 
 
 def validate_data_types(check: Check, dataframe: dk.DuckDBPyConnection):

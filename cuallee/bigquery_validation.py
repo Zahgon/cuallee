@@ -45,26 +45,10 @@ class Compute(ComputeEngine):
         return self.compute_instruction
 
     def is_empty(self, rule: Rule):
-        """Verify the presence of null values in a column"""
-        predicate = f"{rule.column} IS NULL"
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            self._sum_predicate_to_integer(predicate),
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def are_complete(self, rule: Rule):
-        """Verify the absence of null values in a column"""
-        predicate = [f"{c} IS NOT NULL" for c in rule.column]
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            "("
-            + "+".join([self._sum_predicate_to_integer(p) for p in predicate])
-            + f")/{len(rule.column)}",
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def is_unique(self, rule: Rule):
         """Validation for unique values in column"""
@@ -77,80 +61,22 @@ class Compute(ComputeEngine):
         return self.compute_instruction
 
     def has_cardinality(self, rule: Rule):
-        """Validation of number of distinct values in column"""
-        self.compute_instruction = ComputeInstruction(
-            None,
-            f"COUNT(DISTINCT({rule.column}))={rule.value}",
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def has_infogain(self, rule: Rule):
-        """More than 1 distinct value"""
-        self.compute_instruction = ComputeInstruction(
-            None,
-            f"COUNT(DISTINCT({rule.column})) > 1",
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def are_unique(self, rule: Rule):
-        """Validation for unique values in a group of columns"""
-        predicate = None
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            "COUNT(DISTINCT CONCAT("
-            + ", '_', ".join([f"{c}" for c in rule.column])
-            + "))",
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def is_contained_in(self, rule: Rule):
-        """Validation of column value in set of given values"""
-
-        predicate = f"{rule.column} IN {rule.value}"
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            self._sum_predicate_to_integer(predicate),
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def not_contained_in(self, rule: Rule):
-        """Validation of column value not in a set of given values"""
-        predicate = f"{rule.column} NOT IN {rule.value}"
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            self._sum_predicate_to_integer(predicate),
-            ComputeMethod.SQL,
-        )
-        return self.compute_instruction
+        pass
 
     def is_daily(self, rule: Rule):
-        """Validates that there is no missing dates using only week days in the date/timestamp column"""
-
-        predicate = None
-
-        def _execute(dataframe: bigquery.table.Table, key: str) -> str:
-            day_mask = rule.value
-            if not day_mask:
-                day_mask = tuple([2, 3, 4, 5, 6])
-
-            script = Template(
-                """SELECT CASE WHEN numb_rows > 0 THEN CAST(numb_rows*-1 AS STRING) ELSE "true" END AS KEY$key FROM (SELECT COUNT (*) AS numb_rows FROM(SELECT full_interval.date FROM (SELECT date FROM (SELECT date, EXTRACT(DAYOFWEEK FROM date) AS dayofweek FROM UNNEST((SELECT GENERATE_DATE_ARRAY(min, max) AS date FROM (SELECT CAST(MIN($column) AS DATE) AS min, CAST(MAX($column) AS DATE)AS max FROM $table))) AS date ORDER BY date) WHERE dayofweek IN $value) AS full_interval LEFT OUTER JOIN $table AS table ON (full_interval.date=CAST(table.$column AS DATE)) WHERE $column IS NULL))""".strip()
-            )
-
-            return script.substitute(
-                table=dataframe, key=key, column=rule.column, value=day_mask
-            )
-
-        self.compute_instruction = ComputeInstruction(
-            predicate,
-            _execute,
-            ComputeMethod.TRANSFORM,
-        )
-        return self.compute_instruction
+        pass
 
 
 def _get_expressions(compute_set: Dict[str, ComputeInstruction]) -> str:
@@ -175,7 +101,6 @@ def _compute_query_method(
 ) -> Dict:
     """Compute rules throught query"""
 
-    # Filter expression directed to sql
     _sql = lambda x: x.compute_method.name == ComputeMethod.SQL.name
     sql_set = valfilter(_sql, compute_set)
 
@@ -194,7 +119,6 @@ def _compute_transform_method(
 ) -> Dict:
     """Compute rules that require to pass the table as variable"""
 
-    # Filter expression directed to transform
     _transform = lambda x: x.compute_method.name == ComputeMethod.TRANSFORM.name
     transform_set = valfilter(_transform, compute_set)
 
@@ -273,7 +197,6 @@ def compute(rules: Dict[str, Rule]) -> Dict:
 def summary(check: Check, dataframe: bigquery.table.Table):
     """Compute all rules in this check from table loaded in BigQuery"""
 
-    # Check that user is connected to BigQuery
     try:
         client = bigquery.Client()
     except Exception as error:
@@ -281,17 +204,14 @@ def summary(check: Check, dataframe: bigquery.table.Table):
             f"You are not connected to the BigQuery cloud. Please verify the steps followed during the Authenticate API requests step. {str(error)}"
         )
 
-    # Compute the expression
     computed_expressions = compute(check._rule)
 
     query_expression = _compute_query_method(client, dataframe, computed_expressions)
     query_transform = _compute_transform_method(client, dataframe, computed_expressions)
     query_result = {**query_expression, **query_transform}
 
-    # Compute the total number of rows
     rows = _compute_row(client, dataframe)[0]["count"]
 
-    # Results
     computation_basis = [
         {
             "id": index,

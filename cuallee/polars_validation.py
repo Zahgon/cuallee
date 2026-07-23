@@ -35,21 +35,10 @@ class Compute:
         )
 
     def is_empty(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate null"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).is_null().cast(pl.Int8))
-            .sum()
-            .to_series()
-        )
+        pass
 
     def are_complete(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate absence of null in group of columns"""
-        return Compute._result(
-            dataframe.select(
-                [pl.col(c).is_not_null().cast(pl.Int8).sum() for c in rule.column]
-            ).sum_horizontal()
-            / len(rule.column)
-        )
+        pass
 
     def is_unique(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
         """Validate absence of duplicates"""
@@ -73,331 +62,118 @@ class Compute:
             return base
 
     def are_unique(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate absence of duplicate in group of columns"""
-        return Compute._result(
-            dataframe.select(pl.struct(*rule.column).is_unique().cast(pl.Int8)).sum()
-        )
+        pass
 
     def is_greater_than(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate column values greater than threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.gt(pl.col(rule.column), rule.value).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def is_greater_or_equal_than(
         self, rule: Rule, dataframe: pl.DataFrame
     ) -> Union[bool, int]:
-        """Validates column values greater or equal than threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.ge(pl.col(rule.column), rule.value).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def is_less_than(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validates column values less than threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.lt(pl.col(rule.column), rule.value).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def is_less_or_equal_than(
         self, rule: Rule, dataframe: pl.DataFrame
     ) -> Union[bool, int]:
-        """Validates column values less or equal than threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.le(pl.col(rule.column), rule.value).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def is_equal_than(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validates column equality with threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.eq(pl.col(rule.column), rule.value).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def has_pattern(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Conformance on column values to regular expression threshold"""
-        return Compute._result(
-            dataframe.select(
-                operator.gt(pl.col(rule.column).str.count_matches(rule.value), 0).cast(
-                    pl.Int8
-                )
-            )
-            .sum()
-            .to_series()
-        )
+        pass
 
     def has_min(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate minimum value on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).min() == rule.value).to_series()
-        )
+        pass
 
     def has_max(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate maximum value on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).max() == rule.value).to_series()
-        )
+        pass
 
     def has_std(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate standard deviation on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).std() == rule.value).to_series()
-        )
+        pass
 
     def has_mean(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate mean value on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).mean() == rule.value).to_series()
-        )
+        pass
 
     def has_sum(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate sum value on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).sum() == rule.value).to_series()
-        )
+        pass
 
     def has_cardinality(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate sum value on column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).n_unique() == rule.value).to_series()
-        )
+        pass
 
     def has_infogain(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """More than 1 value in column"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).n_unique() > 1).to_series()
-        )
+        pass
 
     def is_between(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate value inclusion on threshold boundaries"""
-        low, high = rule.value
-        return Compute._result(
-            dataframe.select(
-                pl.col(rule.column).is_between(low, high, closed="both").cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def is_contained_in(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate set inclusion"""
-        return Compute._result(
-            dataframe.select(pl.col(rule.column).is_in(rule.value).cast(pl.Int8)).sum()
-        )
+        pass
 
     def not_contained_in(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Validate absence of values in set"""
-        return Compute._result(
-            dataframe.select(
-                (~pl.col(rule.column).is_in(rule.value)).cast(pl.Int8)
-            ).sum()
-        )
+        pass
 
     def has_percentile(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Percentile range verification for column"""
-        return (
-            np.percentile(
-                dataframe.select(pl.col(rule.column)).to_numpy(),
-                rule.settings["percentile"] * 100,
-            )  # type: ignore
-            == rule.value  # type: ignore
-        )
+        pass
 
     def has_max_by(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Adjacent column maximum value verifiation on threshold"""
-        target, base = rule.column
-        return Compute._result(
-            dataframe.filter(pl.col(base) == pl.col(base).max())
-            .select(pl.col(target) == rule.value)
-            .to_series()
-        )
+        pass
 
     def has_min_by(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Adjacent column minimum value verifiation on threshold"""
-        base, target = rule.column
-        return Compute._result(
-            dataframe.filter(pl.col(base) == pl.col(base).min())
-            .select(pl.col(target) == rule.value)
-            .to_series()
-        )
+        pass
 
     def has_correlation(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        col_a, col_b = rule.column
-        return Compute._result(
-            dataframe.select(pl.col(col_a), pl.col(col_b))
-            .corr()
-            .select(pl.col(col_b) == rule.value)
-            .select(pl.all(col_b))
-            .to_series()
-        )
+        pass
 
     def satisfies(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        ctx = pl.SQLContext(cuallee=dataframe)
-        return (
-            ctx.execute(
-                """
-            SELECT ({}) as total
-            FROM cuallee
-            """.format(
-                    rule.value
-                ),
-                eager=True,
-            )
-            .cast(pl.Int8)
-            .sum()
-        )
+        pass
 
     def has_entropy(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        def entropy(labels):
-            """Computes entropy of 0-1 vector."""
-            n_labels = len(labels)
-
-            if n_labels <= 1:
-                return 0
-
-            counts = np.bincount(labels)
-            probs = counts[np.nonzero(counts)] / n_labels
-            n_classes = len(probs)
-
-            if n_classes <= 1:
-                return 0
-
-            return -np.sum(probs * np.log(probs)) / np.log(n_classes)
-
-        return entropy(dataframe.select(pl.col(rule.column)).to_series()) == float(
-            rule.value
-        )
+        pass
 
     def is_on_weekday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().is_between(1, 5).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_weekend(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().is_between(6, 7).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_monday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(1).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_tuesday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(2).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_wednesday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(3).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_thursday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(4).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_friday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(5).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_saturday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(6).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_sunday(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.weekday().eq(7).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_on_schedule(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        return dataframe.select(
-            pl.col(rule.column).dt.hour().is_between(*rule.value).cast(pl.Int8)
-        ).sum()
+        pass
 
     def is_daily(self, rule: Rule, dataframe: pl.DataFrame) -> complex:
-        if rule.value is None:
-            day_mask = [1, 2, 3, 4, 5]
-        else:
-            day_mask = rule.value
-
-        lower = self._value(dataframe.select(pl.col(rule.column)).min())
-        upper = self._value(dataframe.select(pl.col(rule.column)).max())
-        sequence = pl.DataFrame(
-            {"ts": pl.date_range(start=lower, end=upper, interval="1d", eager=True)}
-        )
-        sequence = (
-            sequence.filter(pl.col("ts").dt.weekday().is_in(day_mask))
-            .to_series()
-            .to_list()
-        )
-        delivery = (
-            dataframe.filter(pl.col(rule.column).dt.weekday().is_in(day_mask))
-            .to_series()
-            .to_list()
-        )
-
-        # No difference between sequence of daily as a complex number
-        return complex(len(dataframe), len(set(sequence).difference(delivery)))
+        pass
 
     def is_inside_interquartile_range(
         self, rule: Rule, dataframe: pl.DataFrame
     ) -> Union[bool, complex]:
-        min_q, max_q = rule.value
-        lower = self._value(
-            dataframe.select(
-                pl.col(rule.column).quantile(min_q, interpolation="linear")
-            )
-        )
-        upper = self._value(
-            dataframe.select(
-                pl.col(rule.column).quantile(max_q, interpolation="linear")
-            )
-        )
-        return (
-            dataframe.select(pl.col(rule.column).is_between(lower, upper))
-            .cast(pl.Int8)
-            .sum()
-        )
+        pass
 
     def has_workflow(self, rule: Rule, dataframe: pl.DataFrame) -> Union[bool, int]:
-        """Compliance with adjacency matrix"""
-
-        def workflow(dataframe):
-            group, event, order = rule.column
-            groups = dataframe.partition_by(group)
-            interactions = []
-            _d = compose(
-                list,
-                operator.methodcaller("values"),
-                operator.methodcaller("to_dict", as_series=False),
-            )
-            for g in groups:
-                pairs = list(
-                    zip(
-                        *_d(
-                            g.select(
-                                pl.col(event), pl.col(event).shift(-1).alias("target")
-                            )
-                        )
-                    )
-                )
-                if result := set(pairs).difference(rule.value):
-                    for t in result:
-                        interactions.append(t)
-
-            return len(dataframe) - len(interactions)
-
-        return workflow(dataframe.select(*rule.column))
+        pass
 
 
 def compute(rules: Dict[str, Rule]):
@@ -408,46 +184,10 @@ def compute(rules: Dict[str, Rule]):
 def validate_data_types(rules: List[Rule], dataframe: pl.DataFrame):
     """Validate the datatype of each column according to the CheckDataType of the rule's method"""
 
-    # # COLUMNS
-    # # =======
-    # rule_match = cuallee_utils.match_columns(rules, dataframe.columns)
-    # assert not rule_match, f"Column(s): {rule_match} are not present in dataframe"
 
-    # # NUMERIC
-    # # =======
-    # numeric_columns = cuallee_utils.get_rule_columns(
-    #     cuallee_utils.get_numeric_rules(rules)
-    # )
-    # numeric_dtypes = dataframe.select_dtypes("number")
-    # numeric_match = cuallee_utils.match_data_types(numeric_columns, numeric_dtypes)
-    # assert not numeric_match, f"Column(s): {numeric_match} are not numeric"
 
-    # # DATE
-    # # =======
-    # date_columns = cuallee_utils.get_rule_columns(cuallee_utils.get_date_rules(rules))
-    # date_dtypes = dataframe.select_dtypes("datetime")
-    # date_match = cuallee_utils.match_data_types(date_columns, date_dtypes)
-    # assert not date_match, f"Column(s): {date_match} are not date"
 
-    # # TIMESTAMP
-    # # =======
-    # timestamp_columns = cuallee_utils.get_rule_columns(
-    #     cuallee_utils.get_timestamp_rules(rules)
-    # )
-    # timestamp_dtypes = dataframe.select_dtypes("datetime64")
-    # timestamp_match = cuallee_utils.match_data_types(
-    #     timestamp_columns, timestamp_dtypes
-    # )
-    # assert not timestamp_match, f"Column(s): {timestamp_match} are not timestamp"
 
-    # # STRING
-    # # =======
-    # string_columns = cuallee_utils.get_rule_columns(
-    #     cuallee_utils.get_string_rules(rules)
-    # )
-    # string_dtypes = dataframe.select_dtypes("object")
-    # string_match = cuallee_utils.match_data_types(string_columns, string_dtypes)
-    # assert not string_match, f"Column(s): {string_match} are not string"
 
     return True
 

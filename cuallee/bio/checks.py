@@ -19,9 +19,7 @@ class BioChecks:
         pct: float = 1.0,
         options: Dict[str, str] = {"name": "is_dna"},
     ):
-        """Validates that a sequence contains only valid nucleotide bases of DNA strand"""
-        self._check.has_pattern(column, r"^[GTCA]*$", pct, options=options)
-        return self._check
+        pass
 
     def is_protein(
         self,
@@ -29,14 +27,7 @@ class BioChecks:
         pct: float = 1.0,
         options: Dict[str, str] = {"name": "is_protein"},
     ):
-        """Verifies that a sequence contains only valid aminoacid 1-letter codes"""
-        self._check.has_pattern(
-            column,
-            rf"^[{''.join(self._aminoacids['1_letter_code'].tolist())}]*$",
-            pct,
-            options=options,
-        )
-        return self._check
+        pass
 
     def is_cds(
         self,
@@ -44,11 +35,4 @@ class BioChecks:
         pct: float = 1.0,
         options: Dict[str, str] = {"name": "is_cds"},
     ):
-        """Verifies that a sequence contains the correct codons"""
-        self._check.satisfies(
-            column,
-            f"({column} rlike '^ATG.*') and ({column} rlike '.*(TAA|TAG|TGA)$') and (length({column}) % 3 == 0)",
-            pct,
-            options=options,
-        )
-        return self._check
+        pass
